@@ -1,13 +1,16 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <todolist></todolist>
   </div>
 </template>
-
+<script>
+import todolist from "./components/TodoList";
+export default {
+  components: {
+    todolist
+  }
+};
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

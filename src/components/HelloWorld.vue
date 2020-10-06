@@ -31,13 +31,9 @@
     </ul>
   </div>
 </template>
-
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
+  name: 'todolist',
 }
 </script>
 
