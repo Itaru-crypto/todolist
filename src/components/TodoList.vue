@@ -12,14 +12,17 @@
       <button @click="doAdd(newtodo)">Add</button>
     </div>
     <div v-for="(item, index) in items" :key="index" class="todo-item">
-      <div>
-        <label v-bind:class="{ completed: item.completed}">
-          <input type="checkbox" v-model="item.completed"/>{{ item.title }}
-        </label>
+      <div class="todo-item-left">
+        <!--<label v-bind:class="{completed: item.completed}">-->
+        <div v-if="!item.editing" @dblclick="editTodo(item)" class="todo-item-label">
+          <!--<input type="checkbox" v-model="item.completed"/>-->
+          {{ item.title }}
+        </div>
+        <input v-else class="edit-active" type="text" v-model="item.title" @blur="endEdit(item)" @keyup.enter="endEdit(item)">
+        <!--</label>-->
       </div>
-      <div class="remove-item">
-        &times;
-        
+      <div class="delete-item" @click="deleteTodo(index)">
+        &times; 
       </div>
     </div>    
   </div>
@@ -29,10 +32,10 @@ export default {
   name: 'todolist',
   data() {
     return {
-      idForTodo: 1,
       newtodo: "",
       items: [],
-      completed: false
+      completed: false,
+      editing: false
     };
   },
   methods: {
@@ -41,22 +44,27 @@ export default {
         return
       }
       this.items.push({
-        id: this.idForTodo,
         title: this.newtodo,
         completed: this.completed,
+        editing: this.editing,
       }),
       this.newtodo = "";
-      this.idForTodo ++;
-      this.saveToDo();
+      this.saveTodo();
     },
-    deleteToDo(index) {
+    editTodo(item){
+      item.editing = true;
+    },
+    endEdit(item){
+      item.editing = false;
+    },
+    deleteTodo(index) {
       this.items.splice(index,1);
-      this.saveToDo();
+      this.saveTodo();
     },
-    saveToDo() {
+    saveTodo() {
       localStorage.setItem('items', JSON.stringify(this.items));
     },
-    loadToDO() {
+    loadTodo() {
       this.items = JSON.parse(localStorage.getItem('items'));
       if (!this.items){
         this.items = []
@@ -64,7 +72,7 @@ export default {
     }
   },
   mounted: function(){
-    this.loadToDO();
+    this.loadTodo();
   },
 }
 </script>
@@ -87,13 +95,26 @@ li {
   list-style: none;
 }
 .todo-item{
-  margin-bottom: 12px;
+  width: 40%;
+  align-items: center;
   display: flex;
-  text-align: left;
+  font-size: 20px;
+  margin: 0 auto;
+  margin-bottom: 12px;  
   justify-content: space-between;
-  width: 60%;
+}
+.remove-item{
+  cursor: pointer;
 }
 .completed{
   text-decoration: line-through;
+}
+.edit-active{
+  font-size: 20px;
+  color: #2c3e50;
+  margin-left: 12px;
+  widows: 100%;
+  padding: 10px;
+  border-radius: 1px solid #ccc;
 }
 </style>
