@@ -12,7 +12,7 @@
       />
       <button @click="doAdd(newtodo)">Add</button>
     </div>
-    <div v-for="(item, index) in items" :key="index" class="todo-item">
+    <div v-for="(item, index) in items" :key="item.id" class="todo-item">
       <div class="todo-item-left">
         <div v-if="!item.editing" @dblclick="editTodo(item)" class="todo-item-label" :class="{completed: item.completed}">
           <input type="checkbox" v-model="item.completed"/>
@@ -24,9 +24,14 @@
         &times; 
       </div>
     </div> 
-    <div class="status-bar">
+    <div class="additional-section">
       <div>
-        <label><input type="checkbox" v-model="allcompleted">全ての項目をチェックする</label>
+        <label><input type="checkbox" :checked="!anyRemaining" @change="checkAll">全ての項目をチェックする</label>
+      </div>
+      <div class="status-bar">
+        <button :class="{active:filter ='all'}" @click="filter ='all'">All</button>
+        <button :class="{active:filter ='doing'}" @click="filter ='doing'">Doing</button>
+        <button :class="{active:filter ='done'}" @click="filter ='done'">Done</button>
       </div>
       <span>残り {{remaining}} 項目</span>
     </div>   
@@ -38,16 +43,19 @@ export default {
   data() {
     return {
       newtodo: "",
+      idForTodo: 1,
       items: [],
-      completed: false,
       beforeEditCache: "",
-      editing: false
+      filter: 'all',
     };
   },
   computed:{
     remaining(){
-      return this.items.filter(item => !item.completed).length
-    }
+      return this.items.filter(item => !item.completed).length;
+    },
+    anyRemaining(){
+      return this.remaining !== 0;
+    },
   },
   methods: {
     doAdd() {
@@ -56,11 +64,13 @@ export default {
       }
       this.items.push({
         title: this.newtodo,
+        id: this.idForTodo,
         beforeEditCache: this.beforeEditCache,
-        completed: this.completed,
-        editing: this.editing,
+        completed: false,
+        editing: false,
       }),
       this.newtodo = "";
+      this.idForTodo += 1;
       this.saveTodo();
     },
     editTodo(item){
@@ -81,6 +91,9 @@ export default {
       this.items.splice(index,1);
       this.saveTodo();
     },
+    checkAll(){
+      this.items.forEach((item) => item.completed = event.target.completed);
+    },
     saveTodo() {
       localStorage.setItem('items', JSON.stringify(this.items));
     },
@@ -98,12 +111,24 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400|Raleway:300);
+
 .header h1{
+  width: 20%;
+  padding: 5px 20px;
+  border-radius: 20px;
   background: aquamarine;
+  margin: 0 auto;
+  margin-bottom: 40px;
+}
+.todomaker{
+  width: 40%;
+  margin: 0 auto;
+  display: flex;
 }
 .todomaker input {
-  width: 40%;
+  width: 80%;
   padding: 10px;
   text-align: center;
   font-size: 20px;
@@ -111,8 +136,19 @@ export default {
   margin-bottom: 40px;
 }
 .todomaker button{
-  width: 50px;
+  width: 75px;
+  height: 45px;
   padding: 10px;
+  font-size: 20px;
+  -webkit-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    -moz-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    -ms-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    -o-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+}
+.todomaker button:hover{
+  color: rgba(255, 255, 255, 0.85);
+  box-shadow: rgba(30, 22, 54, 0.7) 0 0px 0px 40px inset;
 }
 li {
   list-style: none;
@@ -143,7 +179,7 @@ li {
   padding: 10px;
   border-radius: 1px solid #ccc;
 }
-.status-bar{
+.additional-section{
   display: flex;
   justify-content: space-between;
   width: 40%;
@@ -151,5 +187,73 @@ li {
   margin-top: 30px;
   padding: 10px 0;
   border-top: 1px solid gray;
+}
+.status-bar button{
+  margin-right: 10px;
+  background-color: white;
+  appearance: none;
+}
+.status-bar button:hover{
+  background: aquamarine;
+}
+.status-bar button:focus{
+  outline: none;
+}
+.active{
+  background-color: aquamarine;
+}
+@media screen and (max-width: 480px){
+  .header h1{
+    width: 40%;
+    padding: 5px 20px;
+    border-radius: 20px;
+    background: aquamarine;
+    margin: 0 auto;
+    margin-top: 5vh;
+    margin-bottom: 40px;
+  }
+  .todomaker{
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+  }
+  .todomaker input {
+    width: 60%;
+    padding: 10px;
+    text-align: center;
+    font-size: 12px;
+    margin-right: 25px;
+    margin-bottom: 40px;
+  }
+  .todomaker button{
+    width: 60px;
+    height: 35px;
+    padding: 5px;
+    font-size: 20px;
+    -webkit-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    -moz-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    -ms-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    -o-transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+    transition: all 200ms cubic-bezier(0.390, 0.500, 0.150, 1.360);
+  }
+  .todomaker button:hover{
+    color: rgba(255, 255, 255, 0.85);
+    box-shadow: rgba(30, 22, 54, 0.7) 0 0px 0px 40px inset;
+  }
+  .todo-item{
+    width: 70%;
+  }
+  .additional-section{
+    width: 70%;
+  }
+  .additional-section label{
+    font-size: 12px;
+  }
+  .additional-section span{
+    font-size: 14px;
+  }
+  .status-bar{
+    display: none;
+  }
 }
 </style>
